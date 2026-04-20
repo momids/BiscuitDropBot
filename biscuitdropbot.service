@@ -1,0 +1,15 @@
+[Unit]
+Description=BiscuitDropBot - Telegram to Bale file forwarder
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/biscuitdropbot
+ExecStart=/opt/biscuitdropbot/venv/bin/python -m bot.main
+Restart=always
+RestartSec=10
+EnvironmentFile=/opt/biscuitdropbot/.env
+
+[Install]
+WantedBy=multi-user.target

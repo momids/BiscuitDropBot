@@ -1,0 +1,18 @@
+# Environment & secrets
+.env
+cookies.txt
+
+# Downloads
+downloads/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
