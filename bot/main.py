@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters
-from bot.handlers import handle_document, handle_video, handle_audio, handle_url, handle_quality_callback, handle_packaging_callback
+from bot.handlers import handle_document, handle_video, handle_audio, handle_url, handle_quality_callback
 
 load_dotenv()
 
@@ -45,7 +45,6 @@ async def main():
     app.add_handler(MessageHandler(filters.AUDIO, handle_audio))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
     app.add_handler(CallbackQueryHandler(handle_quality_callback, pattern=r"^yt_quality:"))
-    app.add_handler(CallbackQueryHandler(handle_packaging_callback, pattern=r"^pack:"))
 
     logging.info("🍪 Biscuit is running...")
     async with app:
