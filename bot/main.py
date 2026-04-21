@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters
-from bot.handlers import handle_document, handle_video, handle_audio, handle_url, handle_quality_callback
+from bot.handlers import ensure_user_allowed, handle_document, handle_video, handle_audio, handle_url, handle_quality_callback
 
 load_dotenv()
 
@@ -25,6 +25,9 @@ START_CAPTION = (
 START_GIF_PATH = Path(__file__).resolve().parent.parent / "Cookie_Chat_Bubble_In_a_charming_animation_style_a_cheerful_round_24177oRz-ezgif.com-optimize.gif"
 
 async def start(update: Update, context):
+    if not await ensure_user_allowed(update):
+        return
+
     if START_GIF_PATH.exists():
         with START_GIF_PATH.open("rb") as animation:
             await update.message.reply_animation(animation=animation, caption=START_CAPTION)

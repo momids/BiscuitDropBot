@@ -31,6 +31,14 @@ cp .env.example .env
 nano .env   # fill in TELEGRAM_TOKEN, BALE_TOKEN, BALE_CHAT_ID
 ```
 
+To restrict who can use the bot, set `ALLOWED_TELEGRAM_USERNAMES` in `.env`:
+
+```env
+ALLOWED_TELEGRAM_USERNAMES=username1,@username2
+```
+
+Leave it empty to allow all Telegram users.
+
 ### 4. Upload cookies.txt (for YouTube auth)
 
 Export cookies from your browser using the "Get cookies.txt LOCALLY" extension, then:

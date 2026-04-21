@@ -1,4 +1,5 @@
 import logging
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from bot.downloader import download, YOUTUBE_REGEX
@@ -7,22 +8,70 @@ from bot.sender import send_to_bale
 
 logger = logging.getLogger(__name__)
 
+
+def get_allowed_telegram_usernames() -> set[str]:
+    allowed_usernames_raw = os.getenv("ALLOWED_TELEGRAM_USERNAMES", "")
+    return {
+        username.strip().lstrip("@").lower()
+        for username in allowed_usernames_raw.split(",")
+        if username.strip()
+    }
+
+
+async def ensure_user_allowed(update: Update) -> bool:
+    allowed_usernames = get_allowed_telegram_usernames()
+
+    if not allowed_usernames:
+        return True
+
+    user = update.effective_user
+    username = (user.username or "").strip().lstrip("@").lower() if user else ""
+    if username in allowed_usernames:
+        return True
+
+    logger.warning(
+        "Blocked access for user id=%s username=%s",
+        getattr(user, "id", None),
+        getattr(user, "username", None),
+    )
+
+    if update.callback_query:
+        await update.callback_query.answer("⛔ Access denied.", show_alert=True)
+    else:
+        message = update.effective_message
+        if message:
+            await message.reply_text("⛔ You are not allowed to use this bot.")
+
+    return False
+
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await ensure_user_allowed(update):
+        return
+
     doc = update.message.document
     logger.info(f"📥 Received document: {doc.file_name}, size: {doc.file_size} bytes, file_id: {doc.file_id}")
     await _process(update, context, source=doc)
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await ensure_user_allowed(update):
+        return
+
     video = update.message.video
     logger.info(f"📥 Received video: {video.file_name}, size: {video.file_size} bytes, file_id: {video.file_id}")
     await _process(update, context, source=video)
 
 async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await ensure_user_allowed(update):
+        return
+
     audio = update.message.audio
     logger.info(f"📥 Received audio: {audio.file_name}, size: {audio.file_size} bytes, file_id: {audio.file_id}")
     await _process(update, context, source=audio)
 
 async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await ensure_user_allowed(update):
+        return
+
     text = update.message.text.strip()
     if not text.startswith("http://") and not text.startswith("https://"):
         await update.message.reply_text("Please send a file, video, or a URL.")
@@ -53,6 +102,9 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _process(update, context, source=text)
 
 async def handle_quality_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await ensure_user_allowed(update):
+        return
+
     query = update.callback_query
     await query.answer()
 
