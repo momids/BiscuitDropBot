@@ -54,7 +54,9 @@ def _download_youtube(url: str, quality: str = "best") -> str:
         "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
         "quiet": False,
         "verbose": False,
-        # Solve YouTube JS challenges via Node.js + remote EJS solver
+        # tv_embedded bypasses datacenter IP bot detection
+        "extractor_args": {"youtube": {"player_client": ["tv_embedded", "web"]}},
+        # JS challenge solver
         "js_runtimes": {"node": {}},
         "remote_components": {"ejs:github": {}},
     }
