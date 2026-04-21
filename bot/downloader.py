@@ -38,11 +38,11 @@ async def download(source, bot, quality: str = "best") -> str:
         return await _download_telegram_file(source, bot)
 
 QUALITY_FORMATS = {
-    "360":  "best[height<=360]/bestvideo[height<=360]+bestaudio/bestvideo[height<=360]/best",
-    "480":  "best[height<=480]/bestvideo[height<=480]+bestaudio/bestvideo[height<=480]/best",
-    "720":  "best[height<=720]/bestvideo[height<=720]+bestaudio/bestvideo[height<=720]/best",
-    "1080": "best[height<=1080]/bestvideo[height<=1080]+bestaudio/bestvideo[height<=1080]/best",
-    "best": "bestvideo+bestaudio/best",
+    "360":  "best[height<=360][ext=mp4]/bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/best",
+    "480":  "best[height<=480][ext=mp4]/bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best",
+    "720":  "best[height<=720][ext=mp4]/bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+    "1080": "best[height<=1080][ext=mp4]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
+    "best": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
 }
 
 def _download_youtube(url: str, quality: str = "best") -> str:
@@ -68,19 +68,13 @@ def _download_youtube(url: str, quality: str = "best") -> str:
         ydl_opts["cookiesfrombrowser"] = (YOUTUBE_COOKIES_BROWSER,)
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        # Use the actual output filename from yt-dlp (respects merge_output_format)
-        filename = ydl.prepare_filename(info, outtmpl=os.path.join(DOWNLOAD_DIR, "%(title)s.mp4"))
-        # Fallback: find the newest mp4 in downloads if prepare_filename is off
+        # Get the actual path yt-dlp wrote to disk
+        try:
+            filename = info["requested_downloads"][0]["filepath"]
+        except (KeyError, IndexError):
+            filename = ydl.prepare_filename(info)
         if not os.path.isfile(filename):
-            files = [
-                os.path.join(DOWNLOAD_DIR, f)
-                for f in os.listdir(DOWNLOAD_DIR)
-                if f.endswith(".mp4")
-            ]
-            if not files:
-                raise FileNotFoundError(f"yt-dlp finished but no .mp4 found in {DOWNLOAD_DIR}")
-            filename = max(files, key=os.path.getmtime)
-            logger.warning(f"prepare_filename missed, using newest file: {filename}")
+            raise FileNotFoundError(f"yt-dlp finished but file not found: {filename}")
     size = os.path.getsize(filename)
     logger.info(f"yt-dlp done → {filename} ({size} bytes)")
     return os.path.abspath(filename)
