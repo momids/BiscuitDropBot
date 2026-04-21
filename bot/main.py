@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters
@@ -16,12 +17,21 @@ logging.basicConfig(
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
+START_CAPTION = (
+    "🍪 Biscuit is ready!\n\n"
+    "Send me a file, video, or YouTube link and "
+    "I'll forward it to Bale in 16MB chunks."
+)
+START_GIF_PATH = Path(__file__).resolve().parent.parent / "Cookie_Chat_Bubble_In_a_charming_animation_style_a_cheerful_round_24177oRz-ezgif.com-optimize.gif"
+
 async def start(update: Update, context):
-    await update.message.reply_text(
-        "🍪 Biscuit is ready!\n\n"
-        "Send me a file, video, or YouTube link and "
-        "I'll forward it to Bale in 16MB chunks."
-    )
+    if START_GIF_PATH.exists():
+        with START_GIF_PATH.open("rb") as animation:
+            await update.message.reply_animation(animation=animation, caption=START_CAPTION)
+        return
+
+    logging.getLogger(__name__).warning("Start GIF not found at %s", START_GIF_PATH)
+    await update.message.reply_text(START_CAPTION)
 
 async def error_handler(update: object, context) -> None:
     logging.getLogger(__name__).error("PTB caught an exception:", exc_info=context.error)
