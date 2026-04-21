@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY bot/ bot/
+COPY Cookie_Chat_Bubble_In_a_charming_animation_style_a_cheerful_round_24177oRz-ezgif.com-optimize.gif ./
 
 # Downloads folder (created at runtime by the bot, but ensure it exists)
 RUN mkdir -p downloads
