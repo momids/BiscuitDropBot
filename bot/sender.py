@@ -31,15 +31,22 @@ async def send_to_bale(parts: list, status_callback) -> None:
                 logger.info(f"POST → {BALE_BASE_URL}/bot<token>/sendDocument")
 
                 if total == 1:
-                    caption = "🍪 Biscuit — Extract the zip to get your file."
+                    caption = "🍪 Biscuit — Your file is ready! Extract the zip to get started."
                 elif i == 0:
-                    # First part of a multi-part split — include assembly instructions
                     original_name = os.path.basename(part_path).rsplit(".part", 1)[0]
                     caption = (
-                        f"🍪 Biscuit — Part {i+1} of {total}\n"
-                        f"Download all {total} parts, then reassemble:\n"
-                        f"• Windows: copy /b \"{original_name}.part*\" \"{original_name}\"\n"
-                        f"• Linux/Mac: cat {original_name}.part* > {original_name}"
+                        f"🍪 Biscuit — Part {i+1} of {total}\n\n"
+                        f"📦 Download all {total} parts, then reassemble:\n\n"
+                        f"🖥️ Windows\n"
+                        f"copy /b \"{original_name}.part*\" \"{original_name}\"\n\n"
+                        f"🐧 Linux\n"
+                        f"cat {original_name}.part* > {original_name}\n\n"
+                        f"🍎 macOS\n"
+                        f"cat {original_name}.part* > {original_name}\n\n"
+                        f"📱 Android (ZArchiver app)\n"
+                        f"Select part001 → Extract here\n\n"
+                        f"🍏 iOS (ZipApp or iZip)\n"
+                        f"Open part001 → Extract"
                     )
                 else:
                     caption = f"🍪 Biscuit — Part {i+1} of {total}"
