@@ -2,4 +2,3 @@ python-telegram-bot[job-queue]==21.*
 yt-dlp
 httpx
 python-dotenv
-py7zr
