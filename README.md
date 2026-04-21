@@ -1,10 +1,10 @@
 # BiscuitDropBot 🍪
 
-A Telegram bot that downloads files, videos, and YouTube links, then forwards them to a Bale group as zip archives split into 16MB chunks when needed.
+A Telegram bot that downloads files, videos, and YouTube links, then lets the user choose how to package them before forwarding to a Bale group in 16MB chunks when needed.
 
 ## Pipeline
 
-Telegram → Download → Zip → Split if needed → Bale
+Telegram → Download → Choose archive mode → Archive → Split if needed → Bale
 
 ## Setup (Ubuntu Server)
 
@@ -63,6 +63,15 @@ cp .env.example .env  # fill in your tokens
 python -m bot.main
 ```
 
+## Archive Choice
+
+After the download completes, Biscuit shows two inline buttons:
+
+- `🖥️ PC-safe ZIP`: best for the current desktop flow. Multipart deliveries arrive as `.zip.part001`, `.zip.part002`, and so on.
+- `📱 Mobile 7Z`: best for mobile archive apps that can often open `.7z.0001` directly.
+
+The `.env` setting `ARCHIVE_MODE` only controls which option is shown first as the recommended choice. Users can still pick either mode for each file.
+
 ## Reassembly
 
 Large files arrive as multiple parts of a zip archive. Download every part, join them back into a single `.zip`, then extract that zip to recover the original file.
@@ -77,6 +86,27 @@ Linux/macOS:
 
 ```bash
 cat video.mp4.zip.part* > video.mp4.zip
+```
+
+## Archive Modes
+
+The default recommended mode is `ARCHIVE_MODE=zip`. This keeps the existing PC-safe flow that already works:
+
+- Single part: send one `.zip`
+- Multi part: send `.zip.part001`, `.zip.part002`, and so on
+- Reassembly: manually join the parts, then extract the `.zip`
+
+You can optionally make the mobile-first option the recommended default with `ARCHIVE_MODE=7z`.
+
+- Single or multi part output is created as a 7z archive
+- Multi part files are named like `.7z.0001`, `.7z.0002`, and so on
+- Many archive apps can open `.7z.0001` directly without a manual join step
+- Recommended mobile apps: ZArchiver or RAR on Android, and any iOS archive app that explicitly supports multi-volume 7z archives
+
+Add this to your `.env` to show `📱 Mobile 7Z` as the recommended option first:
+
+```env
+ARCHIVE_MODE=7z
 ```
 
 
