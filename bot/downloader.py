@@ -68,9 +68,19 @@ def _download_youtube(url: str, quality: str = "best") -> str:
         ydl_opts["cookiesfrombrowser"] = (YOUTUBE_COOKIES_BROWSER,)
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info)
-        if not filename.endswith(".mp4"):
-            filename = os.path.splitext(filename)[0] + ".mp4"
+        # Use the actual output filename from yt-dlp (respects merge_output_format)
+        filename = ydl.prepare_filename(info, outtmpl=os.path.join(DOWNLOAD_DIR, "%(title)s.mp4"))
+        # Fallback: find the newest mp4 in downloads if prepare_filename is off
+        if not os.path.isfile(filename):
+            files = [
+                os.path.join(DOWNLOAD_DIR, f)
+                for f in os.listdir(DOWNLOAD_DIR)
+                if f.endswith(".mp4")
+            ]
+            if not files:
+                raise FileNotFoundError(f"yt-dlp finished but no .mp4 found in {DOWNLOAD_DIR}")
+            filename = max(files, key=os.path.getmtime)
+            logger.warning(f"prepare_filename missed, using newest file: {filename}")
     size = os.path.getsize(filename)
     logger.info(f"yt-dlp done → {filename} ({size} bytes)")
     return os.path.abspath(filename)
