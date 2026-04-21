@@ -1,10 +1,10 @@
 # BiscuitDropBot 🍪
 
-A Telegram bot that downloads files, videos, and YouTube links, then forwards them to a Bale group in 16MB chunks.
+A Telegram bot that downloads files, videos, and YouTube links, then forwards them to a Bale group as zip archives split into 16MB chunks when needed.
 
 ## Pipeline
 
-Telegram → Download → Zip/Split → Bale
+Telegram → Download → Zip → Split if needed → Bale
 
 ## Setup (Ubuntu Server)
 
@@ -61,6 +61,22 @@ journalctl -u biscuitdropbot -f
 pip install -r requirements.txt
 cp .env.example .env  # fill in your tokens
 python -m bot.main
+```
+
+## Reassembly
+
+Large files arrive as multiple parts of a zip archive. Download every part, join them back into a single `.zip`, then extract that zip to recover the original file.
+
+Windows:
+
+```cmd
+copy /b "video.mp4.zip.part*" "video.mp4.zip"
+```
+
+Linux/macOS:
+
+```bash
+cat video.mp4.zip.part* > video.mp4.zip
 ```
 
 

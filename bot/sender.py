@@ -36,17 +36,16 @@ async def send_to_bale(parts: list, status_callback) -> None:
                     original_name = os.path.basename(part_path).rsplit(".part", 1)[0]
                     caption = (
                         f"🍪 Biscuit — Part {i+1} of {total}\n\n"
-                        f"📦 Download all {total} parts, then reassemble:\n\n"
+                        f"📦 Download all {total} parts, reassemble the zip, then extract it:\n\n"
                         f"🖥️ Windows\n"
                         f"copy /b \"{original_name}.part*\" \"{original_name}\"\n\n"
                         f"🐧 Linux\n"
                         f"cat {original_name}.part* > {original_name}\n\n"
                         f"🍎 macOS\n"
                         f"cat {original_name}.part* > {original_name}\n\n"
-                        f"📱 Android (ZArchiver app)\n"
-                        f"Select part001 → Extract here\n\n"
-                        f"🍏 iOS (ZipApp or iZip)\n"
-                        f"Open part001 → Extract"
+                        f"Then extract {original_name} to recover your original file.\n\n"
+                        f"📱 Mobile\n"
+                        f"Join the parts into {original_name} first, then open that zip in your archive app."
                     )
                 else:
                     caption = f"🍪 Biscuit — Part {i+1} of {total}"
