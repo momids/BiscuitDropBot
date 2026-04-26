@@ -4,6 +4,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+CHUNK_SIZE_MB = int(os.getenv("CHUNK_SIZE_MB", "10"))
+
 
 def _build_archive(file_path: str) -> str:
     base_name = os.path.basename(file_path)
@@ -17,7 +19,7 @@ def _build_archive(file_path: str) -> str:
     logger.info(f"Archive ready → {archive_path} ({archive_size} bytes)")
     return archive_path
 
-def split_into_parts(file_path: str, chunk_mb: int = 16) -> list:
+def split_into_parts(file_path: str, chunk_mb: int = CHUNK_SIZE_MB) -> list:
     chunk_size = chunk_mb * 1024 * 1024
     archive_path = _build_archive(file_path)
     archive_name = os.path.basename(archive_path)
