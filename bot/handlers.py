@@ -3,7 +3,7 @@ import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from bot.downloader import download, YOUTUBE_REGEX
-from bot.zipper import split_into_parts
+from bot.zipper import split_into_parts, CHUNK_SIZE_MB
 from bot.sender import send_to_bale
 
 logger = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ async def _process(update: Update, context: ContextTypes.DEFAULT_TYPE, source, q
 
         await status(f"🗜️ Step 2/4 — Zipping {local_path}...")
         logger.info("Calling zipper...")
-        parts = split_into_parts(local_path)
+        parts = split_into_parts(local_path, chunk_mb=CHUNK_SIZE_MB)
         logger.info(f"✅ Zip complete: {len(parts)} part(s) → {parts}")
 
         await status(f"📤 Step 3/4 — Sending {len(parts)} part(s) to Bale...")
